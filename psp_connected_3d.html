@@ -41,7 +41,7 @@ function clipped(g, box) {
   }
   return new Uint32Array(keep);
 }
-function niceTicks(a, b) {   // 4-6 ticks at 1/2/2.5/5 x 10^k, decimals from the step (so -1.55 is never rounded to -1.6)
+function niceTicks(a, b) {
   const span = b - a, raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw)));
   let step = p; for (const f of [1, 2, 2.5, 5, 10]) { if (raw <= f * p) { step = f * p; break; } }
   const dec = Math.max(0, Math.ceil(-Math.log10(step) - 1e-9));
@@ -68,7 +68,6 @@ function makePanel(p) {
   const center = new THREE.Vector3(cx, cy, cz);
   const span = Math.max(x1 - x0, y1 - y0, z1 - z0);
   const pos = new THREE.BufferAttribute(verts, 3);
-  // faces pushed back by polygon offset so the black triangle edges (1 device pixel) always win the depth test
   const edgeOpacity = p.box ? 0.85 : 0.35;
   for (const g of GROUPS) {
     const idx = clipped(g, p.box); if (!idx.length) continue;
@@ -76,12 +75,11 @@ function makePanel(p) {
     scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: g.color, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })));
     scene.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo), new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: edgeOpacity })));
   }
-  if (!p.box) {   // overview: the 3.2 mm wire is thinner than one pixel, so also draw its axis as an orange hairline
+  if (!p.box) {
     const hp = []; for (const d of [-0.008, 0, 0.008]) hp.push(0, -1.493, 0.2121 + d, 0, -3.45, 0.2121 + d, d, -1.493, 0.2121, d, -3.45, 0.2121);
     const hair = new THREE.BufferGeometry(); hair.setAttribute("position", new THREE.Float32BufferAttribute(hp, 3));
     const hl = new THREE.LineSegments(hair, new THREE.LineBasicMaterial({ color: 0xe6550d, depthTest: false })); hl.renderOrder = 10; scene.add(hl);
   }
-  // matplotlib-style axis panes: grey quad exactly on the box face + white grid, the three far faces shown per camera side
   const tx = niceTicks(x0, x1), ty = niceTicks(y0, y1), tz = niceTicks(z0, z1);
   const paneMat = new THREE.MeshBasicMaterial({ color: 0xe6e6e6, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 });
   const gridMat = new THREE.LineBasicMaterial({ color: 0xffffff });
@@ -114,7 +112,6 @@ function makePanel(p) {
     camera.lookAt(state.target); camera.updateProjectionMatrix();
   }
   function layout() {
-    // far panes visible, near ones hidden; tick labels on the near bottom edges, z labels on the far-x / near-y vertical edge
     const sx = camera.position.x > cx ? 1 : -1, sy = camera.position.y > cy ? 1 : -1, sz = camera.position.z > cz ? 1 : -1;
     panes.x[0].visible = sx > 0; panes.x[1].visible = sx < 0; panes.y[0].visible = sy > 0; panes.y[1].visible = sy < 0; panes.z[0].visible = sz > 0; panes.z[1].visible = sz < 0;
     const xn = sx > 0 ? x1 : x0, xf = sx > 0 ? x0 : x1, yn = sy > 0 ? y1 : y0, zp = sz > 0 ? z0 : z1;
@@ -125,7 +122,7 @@ function makePanel(p) {
     ax.v.set(cx, yn + 2.4 * oy, zp + 2.2 * oz); ay.v.set(xn + 2.4 * ox, cy, zp + 2.2 * oz); az.v.set(xf - 2.4 * ox, yn + 2.4 * oy, cz);
   }
   const corners = []; for (const X of [x0, x1]) for (const Y of [y0, y1]) for (const Z of [z0, z1]) corners.push(new THREE.Vector3(X, Y, Z));
-  function fit() {   // matplotlib-like autoscale: the box fills 2/3 of the view and every label stays inside it
+  function fit() {
     for (let it = 0; it < 6; it++) {
       place(); layout(); let m = 0;
       for (const c of corners) { const q = c.clone().project(camera); m = Math.max(m, Math.abs(q.x) / 0.66, Math.abs(q.y) / 0.66); }

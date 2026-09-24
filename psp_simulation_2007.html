@@ -75,7 +75,7 @@ const CASES = [{"id":"r9p5","label":"9.5 Rs","cond":{"electronDensity":402200000
   const sup = n => String(n).replace(/-/g, "⁻").replace(/\d/g, d => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]);
   const sig = (v, s) => { const x = Number(v.toPrecision(s)); return Math.abs(x) >= 100 ? x.toFixed(0) : String(x); };
   const minus = s => String(s).replace(/^-/, "−");
-  const FS = W => Math.max(11, Math.min(15, W / 28));
+  const FS = W => Math.max(12, Math.min(16, W / 25));
   const SUN = 'R<svg class="sun" viewBox="0 0 10 10" aria-label="sun"><circle cx="5" cy="5" r="4.2" fill="none" stroke="currentColor" stroke-width="1.1"/><circle cx="5" cy="5" r="1.2" fill="currentColor"/></svg>';
   const rows = $("rows");
   CASES.forEach((c, ci) => {
@@ -131,7 +131,7 @@ const CASES = [{"id":"r9p5","label":"9.5 Rs","cond":{"electronDensity":402200000
     { key: "pho", letter: "(d)", unit: () => "log₁₀ photoelectron density (m⁻³)" },
   ].map(p => Object.assign(p, { cv: $("c-" + p.key) }));
   function draw(P) {
-    const cv = P.cv, W = cv.clientWidth, fs = FS(W), ml = 3.0 * fs, mr = 4.6 * fs, mt = 2 * fs, mb = 3.1 * fs, S = Math.round(W - ml - mr), H = Math.round(mt + S + mb), dpr = Math.min(2, window.devicePixelRatio || 1);
+    const cv = P.cv, W = cv.clientWidth, fs = FS(W), ml = 3.0 * fs, mr = 4.3 * fs, mt = 2 * fs, mb = 3.1 * fs, S = Math.round(W - ml - mr), H = Math.round(mt + S + mb), dpr = Math.min(2, window.devicePixelRatio || 1);
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.style.height = H + "px"; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H);
@@ -200,10 +200,9 @@ const CASES = [{"id":"r9p5","label":"9.5 Rs","cond":{"electronDensity":402200000
   if (!playing) { btn.textContent = "Play"; btn.setAttribute("aria-label", "Play"); }
   function wFromH(h) { const fs = FS(h / 0.832); return h + 4.7 * fs; }
   function layout() {
-    const pn = document.querySelector(".panels");
-    const full = Math.max(280, document.documentElement.clientWidth - 32 - 8);
-    const cols = full < 520 ? 1 : full < 900 ? 2 : 4, gap = 2, W = Math.floor((full - (cols - 1) * gap) / cols);
-    pn.style.gridTemplateColumns = "repeat(" + cols + ", " + W + "px)";
+    const pn = document.querySelector(".panels"), w = pn.clientWidth;
+    const cols = w < 520 ? 1 : w < 900 ? 2 : 4;
+    pn.style.gridTemplateColumns = "repeat(" + cols + ", minmax(0, 1fr))";
   }
   layout();
   window.addEventListener("resize", () => { layout(); render(); });

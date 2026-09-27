@@ -19,7 +19,8 @@ SETS = {"cap": [(0.8, ["WIRE3D_r08f", "WIRE3D_r08t"]), (1.6, ["WIRE3D_fast"]), (
         "nocap": [(0.8, ["WIRE3D_r08n"]), (1.6, ["WIRE3D_noC_vr"]), (3.2, ["WIRE3D_r32n"]), (6.4, ["WIRE3D_r64n"]), (12.8, ["WIRE3D_r128n"])],
         "d16": [(0.8, ["WIRE3D_r08d16"]), (1.6, ["WIRE3D_r16d16"]), (3.2, ["WIRE3D_r32d16"]), (6.4, ["WIRE3D_r64d16"]), (12.8, ["WIRE3D_r128d16"])],
         "p20": [(0.8, ["WIRE3D_r08p20"]), (1.6, ["WIRE3D_r16p20"]), (3.2, ["WIRE3D_r32p20"]), (6.4, ["WIRE3D_r64p20"]), (12.8, ["WIRE3D_r128p20"]),
-                (25.6, ["WIRE3D_r256p20"]), (51.2, ["WIRE3D_r512p20"])],
+                (25.6, ["WIRE3D_r256p20"]), (51.2, ["WIRE3D_r512p20"]), (102.4, ["WIRE3D_r1024p20"]), (204.8, ["WIRE3D_r2048p20"]),
+                (409.6, ["WIRE3D_r4096p20"])],
         "k": [(0.8, ["WIRE3D_k08t"]), (1.6, ["WIRE3D_k16t"]), (3.2, ["WIRE3D_k32t"]), (6.4, ["WIRE3D_k64t"]), (12.8, ["WIRE3D_k128t"])],
         "1au_n10": [(r, ["WIRE3D_1AU_r%sn10" % t]) for r, t in ((0.8, "08"), (1.6, "16"), (3.2, "32"), (6.4, "64"), (12.8, "128"), (25.6, "256"), (51.2, "512"))],
         "1au_c10": [(r, ["WIRE3D_1AU_r%sc10" % t]) for r, t in ((0.8, "08"), (1.6, "16"), (3.2, "32"), (6.4, "64"), (12.8, "128"), (25.6, "256"), (51.2, "512"))]}
@@ -27,10 +28,10 @@ T0 = 6e-4 if SET.startswith("1au") else 3e-5
 TRUN = 2e-6
 TSERIES = 1e-5
 BODY, ANT = 0, 6
-RADII = [0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2]
-COL = ["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728", "#9467bd", "#8c564b", "#e377c2"]
-MK = ["+", "x", "D", "o", "*", "v", "^"]
-MS = {"+": 5.5, "x": 5.0, "D": 3.2, "o": 3.4, "*": 5.5, "v": 3.6, "^": 3.6}
+RADII = [0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2, 102.4, 204.8, 409.6]
+COL = ["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#17becf", "#bcbd22", "#7f7f7f"]
+MK = ["+", "x", "D", "o", "*", "v", "^", "s", "p", "<"]
+MS = {"+": 5.5, "x": 5.0, "D": 3.2, "o": 3.4, "*": 5.5, "v": 3.6, "^": 3.6, "s": 3.2, "p": 3.8, "<": 3.6}
 
 plt.rcParams.update({
     "font.family": "serif", "font.serif": ["Times New Roman", "DejaVu Serif"], "mathtext.fontset": "stix",
@@ -127,7 +128,7 @@ XMAX = max(80.0, np.ceil(TMAX / 10) * 10)
 TR = 0.62 * max(1.0, (len(USED) + 1) / 6.0)
 fig = plt.figure(figsize=(7.0, round(6.6 * (2.0 + TR) / 2.62, 3)))
 gs = GridSpec(3, 4, figure=fig, height_ratios=[1.0, 1.0, TR], left=0.088, right=0.958, top=0.985, bottom=0.02, wspace=0.9, hspace=0.36)
-ax = np.array([[fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4])], [fig.add_subplot(gs[1, 1:3]), None]])
+ax = np.array([[fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4])], [fig.add_subplot(gs[1, 0:4] if max(RS) > 51.2 else gs[1, 1:3]), None]])
 for col, (node, ylab) in enumerate([(ANT, "Antenna Potential (V)"), (BODY, "Spacecraft Potential (V)")]):
     a = ax[0, col]
     vmax = max(S[(r, node)][1].max() for r in RS)
